@@ -52,7 +52,8 @@ public class ButtonActivity extends Activity {
     private MqttAndroidClient mqttAndroidClient;
     final String serverUri = "tcp://mqtt.cmmc.io:1883";
     final String clientId = "ExampleAndroidClient" + System.currentTimeMillis() + Math.random();
-    final String subscriptionTopic = "led001";
+    final String sub_topic = "led001";
+    final String pub_topic = "led001";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +85,7 @@ public class ButtonActivity extends Activity {
         if (keyCode == KeyEvent.KEYCODE_SPACE) {
             // Turn on the LED
             setLedValue(true);
-            publish("test001", "ON");
+            publish(pub_topic, "ON");
             Log.d(TAG, "Press");
             return true;
         }
@@ -164,7 +165,7 @@ public class ButtonActivity extends Activity {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
                 Log.d(TAG, "connectComplete: ");
-                subscribe("led001");
+                subscribe(sub_topic);
             }
 
             @Override
