@@ -66,17 +66,31 @@ public class MainActivity extends Activity {
     final String serverUri = "tcp://mqtt.cmmc.io:1883";
     final String clientId = "ExampleAndroidClient" + System.currentTimeMillis() + Math.random();
 
+    private void publish(String topic, String payload) {
+        try {
+            mqttAndroidClient.publish(topic, new MqttMessage(payload.getBytes()));
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void subscribe(String topic) {
+        int qos = 0;
+        try {
+            mqttAndroidClient.subscribe(topic, qos);
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void setupMqttClient() {
         mqttAndroidClient = new MqttAndroidClient(getApplicationContext(), serverUri, clientId);
         mqttAndroidClient.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
-                try {
-                    mqttAndroidClient.publish("test", new MqttMessage("HELLO".getBytes()));
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
                 Log.d(TAG, "connectComplete: ");
+                subscribe("test");
+                publish("test", "hello world");
             }
 
             @Override

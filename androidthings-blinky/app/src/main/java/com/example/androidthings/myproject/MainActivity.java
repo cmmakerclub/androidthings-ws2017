@@ -48,7 +48,7 @@ public class MainActivity extends Activity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int INTERVAL_BETWEEN_BLINKS_MS = 1000;
     private Gpio mLedGpio;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
