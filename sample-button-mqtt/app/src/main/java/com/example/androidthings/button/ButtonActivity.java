@@ -164,7 +164,7 @@ public class ButtonActivity extends Activity {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
                 Log.d(TAG, "connectComplete: ");
-                subscribe("test");
+                subscribe("led001");
             }
 
             @Override
@@ -180,8 +180,7 @@ public class ButtonActivity extends Activity {
                         setLedValue(true);
                     } else if (message.toString().equals("OFF")) {
                         setLedValue(false);
-                    }
-                    else {
+                    } else {
                         Log.d(TAG, "messageArrived: INVALID MQTT MSG");
                     }
                 }
