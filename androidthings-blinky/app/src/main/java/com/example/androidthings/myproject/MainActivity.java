@@ -25,6 +25,8 @@ import com.google.android.things.pio.Gpio;
 import com.google.android.things.pio.PeripheralManagerService;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Skeleton of the main Android Things activity. Implement your device's logic
@@ -47,7 +49,9 @@ import java.io.IOException;
 public class MainActivity extends Activity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int INTERVAL_BETWEEN_BLINKS_MS = 1000;
+
     private Gpio mLedGpio;
+    private Handler mHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,29 +63,29 @@ public class MainActivity extends Activity {
             mLedGpio = service.openGpio(pinName);
             mLedGpio.setDirection(Gpio.DIRECTION_OUT_INITIALLY_LOW);
             Log.i(TAG, "Start blinking LED GPIO pin");
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
+            mHandler.post(mBlinkRunnable);
+
+            /*Handler handler = new Handler();
+            handler.postDelayed(new Runnable(){
                 @Override
                 public void run() {
-                    if (mLedGpio == null) {
-                        return;
-                    }
-                    try {
-                        // Toggle the GPIO state
-                        mLedGpio.setValue(!mLedGpio.getValue());
-                        Log.d(TAG, "State set to " + mLedGpio.getValue());
-
-                        // Reschedule the same runnable in {#INTERVAL_BETWEEN_BLINKS_MS} milliseconds
-                        //mHandler.postDelayed(mBlinkRunnable, INTERVAL_BETWEEN_BLINKS_MS);
-                    } catch (IOException e) {
-                        Log.e(TAG, "Error on PeripheralIO API", e);
-                    }
-
+                    Log.d(TAG, "run: ANOTHER INTERVAL");
+                    Log.d(TAG, "run: ANOTHER INTERVAL");
+                    Log.d(TAG, "run: ANOTHER INTERVAL");
+                    Log.d(TAG, "run: ANOTHER INTERVAL");
                 }
-            }, INTERVAL_BETWEEN_BLINKS_MS);
-            // Post a Runnable that continuously switch the state of the GPIO, blinking the
-            // corresponding LED
-//            mHandler.post(mBlinkRunnable);
+            }, 1000);
+            */
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    Log.d(TAG, "==RUN== with timerTask.");
+                }
+            };
+            Timer t = new Timer();
+            //void schedule(TimerTask task, long delay, long period)
+            t.schedule(timerTask, 300, 5000);
+
         } catch (IOException e) {
             Log.e(TAG, "Error on PeripheralIO API", e);
         }
@@ -91,6 +95,36 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy");
+        // Remove pending blink Runnable from the handler.
+        mHandler.removeCallbacks(mBlinkRunnable);
+        // Close the Gpio pin.
+        Log.i(TAG, "Closing LED GPIO pin");
+        try {
+            mLedGpio.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Error on PeripheralIO API", e);
+        } finally {
+            mLedGpio = null;
+        }
     }
+
+    private Runnable mBlinkRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // Exit Runnable if the GPIO is already closed
+            if (mLedGpio == null) {
+                return;
+            }
+            try {
+                // Toggle the GPIO state
+                mLedGpio.setValue(!mLedGpio.getValue());
+                Log.d(TAG, "State set to " + mLedGpio.getValue());
+
+                // Reschedule the same runnable in {#INTERVAL_BETWEEN_BLINKS_MS} milliseconds
+                mHandler.postDelayed(mBlinkRunnable, INTERVAL_BETWEEN_BLINKS_MS);
+            } catch (IOException e) {
+                Log.e(TAG, "Error on PeripheralIO API", e);
+            }
+        }
+    };
 }
